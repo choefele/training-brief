@@ -1,8 +1,8 @@
 import {
-  addDays, CHART_ATTRIBUTION, dayKey, FAMILIES, FAMILY_ORDER, fmtDate, fmtDistance, fmtDur, fmtElevation, fmtHours, fmtInt, fmtMMSS, fmtShort,
+  addDays, binSpan, CHART_ATTRIBUTION, dayKey, FAMILIES, FAMILY_ORDER, fmtDate, fmtDistance, fmtDur, fmtElevation, fmtHours, fmtInt, fmtMMSS, fmtShort, fmtSpan,
   fmtTime, isFamily, loadComparison, loadTrend, matchesFilter, median, monday, MONTHS, pad, paceOrSpeed, parseDay, queryWords, sizeVerdict,
   startOfDay, TE_BANDS, teLabel, typeLabel, unitsFor, usesPace, weekdayIndex, WEEKDAYS, weightedHR,
-  type Activity, type ActivityFilter, type DateRange, type ExportFormat, type ExportResult, type ExportSections, type Family, type Units,
+  type Activity, type ActivityFilter, type BinSpan, type DateRange, type ExportFormat, type ExportResult, type ExportSections, type Family, type Units,
 } from '@training-brief/core';
 import { buildBrief } from '../lib/brief.ts';
 import { loadDataset, type Dataset } from '../lib/dataset.ts';
@@ -192,7 +192,20 @@ const VOL: Record<VolMetric, { get: (a: Activity) => number; fmt: (v: number) =>
   count: { get: () => 1, fmt: v => v + (v === 1 ? ' session' : ' sessions'), tick: v => String(v) },
 };
 
-interface Bin { start: Date; end: Date; v: Partial<Record<Family, number>>; total: number }
+interface Bin { start: Date; end: Date; v: Partial<Record<Family, number>>; total: number; span?: BinSpan }
+
+/** Tooltip lines that say which days a bar counts and, for a partial bar, why. */
+function spanLines(b: Bin, monthly: boolean): string[] {
+  const s = b.span!, unit = monthly ? 'month' : 'week', count = `${s.days} of ${s.totalDays} days`;
+  const lines = [fmtSpan(s.first, s.last)];
+  if (s.full) return lines;
+  const edge = (d: Date): string => (monthly ? fmtShort(d) : WEEKDAYS[weekdayIndex(d)]);
+  if (s.inProgress && !s.startsLate) lines.push(`${unit[0].toUpperCase() + unit.slice(1)} in progress · ${count}`);
+  else if (s.startsLate && !s.endsEarly && !s.inProgress) lines.push(`Partial ${unit} · range starts ${edge(s.first)} · ${count}`);
+  else if (s.endsEarly && !s.startsLate) lines.push(`Partial ${unit} · range ends ${edge(s.last)} · ${count}`);
+  else lines.push(`Partial ${unit} · ${count}`);
+  return lines;
+}
 
 function renderVolume(): void {
   const el = $('#volChart'), W = Math.max(280, el.clientWidth), H = 230, m = { l: 46, r: 6, t: 8, b: 24 };
@@ -209,7 +222,10 @@ function renderVolume(): void {
     const b = bins.find(b => a.start >= b.start && a.start < b.end);
     if (b) b.v[a.fam] = (b.v[a.fam] ?? 0) + g.get(a);
   });
-  bins.forEach(b => (b.total = Object.values(b.v).reduce((s, x) => s + (x ?? 0), 0)));
+  bins.forEach(b => {
+    b.total = Object.values(b.v).reduce((s, x) => s + (x ?? 0), 0);
+    b.span = binSpan(b.start, b.end, from, to);
+  });
   const max = Math.max(...bins.map(b => b.total), 0);
   if (!filtered.length || !max) {
     el.innerHTML = '<p class="empty">Nothing to chart for this selection.</p>';
@@ -218,7 +234,8 @@ function renderVolume(): void {
   }
   const step = niceStep(max), top = Math.ceil(max / step) * step;
   const iw = W - m.l - m.r, ih = H - m.t - m.b, bw = iw / bins.length, y = (v: number): number => m.t + ih - (v / top) * ih;
-  let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${monthly ? 'Monthly' : 'Weekly'} ${S.vol} by sport"><g class="ax">`;
+  let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${monthly ? 'Monthly' : 'Weekly'} ${S.vol} by sport">` +
+    '<defs><pattern id="partialHatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)"><rect width="3" height="6" style="fill:var(--surface)" fill-opacity=".55"></rect></pattern></defs><g class="ax">';
   for (let v = 0; v <= top + 1e-9; v += step) s += `<line class="g" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"></line><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${g.tick(+v.toFixed(2))}</text>`;
   const every = Math.ceil(bins.length / Math.max(2, Math.floor(iw / 62)));
   bins.forEach((b, i) => {
@@ -236,15 +253,22 @@ function renderVolume(): void {
       s += `<rect x="${x}" y="${y1}" width="${w}" height="${Math.max(0, y0 - y1 - (acc ? 1 : 0))}" style="fill:${FAMILIES[f].color}" rx="1.5"></rect>`;
       acc += v;
     });
-    const label = monthly ? `${MONTHS[b.start.getMonth()]} ${b.start.getFullYear()}` : `Week of ${fmtDate(b.start)}`;
+    // Hatching marks bars that count fewer days than a whole week or month.
+    if (acc && !b.span!.full) s += `<rect x="${x}" y="${y(acc)}" width="${w}" height="${y(0) - y(acc)}" fill="url(#partialHatch)" rx="1.5"></rect>`;
     const lines = FAMILY_ORDER.filter(f => b.v[f]).map(f => `${FAMILIES[f].label}: ${g.fmt(b.v[f]!)}`);
-    s += `<rect class="hit" x="${m.l + i * bw}" y="${m.t}" width="${bw}" height="${ih}" data-tip="${esc(label + '\nTotal: ' + g.fmt(b.total) + (lines.length > 1 ? '\n' + lines.join('\n') : ''))}"></rect>`;
+    const tip = [...spanLines(b, monthly), `Total: ${g.fmt(b.total)}`, ...(lines.length > 1 ? lines : [])].join('\n');
+    s += `<rect class="hit" x="${m.l + i * bw}" y="${m.t}" width="${bw}" height="${ih}" data-tip="${esc(tip)}"></rect>`;
   });
   s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(0)}" y2="${y(0)}" style="stroke:var(--muted)"></line></svg>`;
   el.innerHTML = s;
-  const avg = bins.reduce((t, b) => t + b.total, 0) / bins.length;
+  // Partial bars would pull the average down; leave them out unless nothing else is left.
+  const unit = monthly ? 'month' : 'week';
+  const full = bins.filter(b => b.span!.full), counted = full.length ? full : bins;
+  const avg = counted.reduce((t, b) => t + b.total, 0) / counted.length;
+  const hasPartial = full.length < bins.length;
   $('#volLegend').innerHTML = FAMILY_ORDER.filter(f => bins.some(b => b.v[f])).map(f => `<span><i style="background:${FAMILIES[f].color}"></i>${FAMILIES[f].label}</span>`).join('') +
-    `<span style="margin-left:auto">Average per ${monthly ? 'month' : 'week'}: <b class="num" style="color:var(--ink)">${g.fmt(S.vol === 'count' ? Math.round(avg * 10) / 10 : avg)}</b></span>`;
+    (hasPartial ? `<span><i class="partial"></i>Partial ${unit}</span>` : '') +
+    `<span style="margin-left:auto">Average per ${hasPartial && full.length ? `full ${unit}` : unit}: <b class="num" style="color:var(--ink)">${g.fmt(S.vol === 'count' ? Math.round(avg * 10) / 10 : avg)}</b></span>`;
 }
 
 function renderHeat(): void {

@@ -45,6 +45,7 @@ nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: 
 .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
 .legend span { display: inline-flex; align-items: center; gap: 5px; }
 .legend i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+.legend i.partial { background: repeating-linear-gradient(45deg, var(--muted) 0 2px, color-mix(in srgb, var(--muted) 35%, transparent) 2px 4px); }
 .heat-scroll { overflow-x: auto; padding-bottom: 4px; }
 .empty { color: var(--muted); font-size: 14px; padding: 18px 0; margin: 0; }
 

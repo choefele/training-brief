@@ -49,6 +49,50 @@ export const fmtDate = (d: Date): string => `${d.getDate()} ${MONTHS[d.getMonth(
 export const fmtShort = (d: Date): string => `${d.getDate()} ${MONTHS[d.getMonth()]}`;
 export const fmtTime = (d: Date): string => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
+/** "Mon 27 Oct – Sun 2 Nov 2026"; the year appears on both ends only when the span crosses New Year. */
+export function fmtSpan(first: Date, last: Date): string {
+  const day = (d: Date): string => `${WEEKDAYS[weekdayIndex(d)]} ${fmtShort(d)}`;
+  if (daysBetween(first, last) === 0) return `${day(first)} ${first.getFullYear()}`;
+  if (first.getFullYear() !== last.getFullYear()) return `${day(first)} ${first.getFullYear()} – ${day(last)} ${last.getFullYear()}`;
+  return `${day(first)} – ${day(last)} ${last.getFullYear()}`;
+}
+
+/** Which days of a chart bar a chart actually counts. */
+export interface BinSpan {
+  /** First and last day counted (inclusive). */
+  first: Date;
+  last: Date;
+  /** Days counted, and days in the whole week or month. */
+  days: number;
+  totalDays: number;
+  /** Every day of the bin is counted. */
+  full: boolean;
+  /** The selected range starts after the bin does. */
+  startsLate: boolean;
+  /** The selected range ends before the bin does. */
+  endsEarly: boolean;
+  /** The bin runs past today, so days are still to come. */
+  inProgress: boolean;
+}
+
+/**
+ * Clips the bin [start, end) to the chart window [from, to) and to today.
+ * Charts group by whole weeks or months, so the first and last bars often count fewer days.
+ */
+export function binSpan(start: Date, end: Date, from: Date, to: Date, today: Date = startOfDay(new Date())): BinSpan {
+  const tomorrow = addDays(startOfDay(today), 1);
+  const first = from > start ? startOfDay(from) : start;
+  const windowEnd = to < end ? startOfDay(to) : end;
+  const stop = windowEnd > tomorrow ? tomorrow : windowEnd;
+  const days = Math.max(0, daysBetween(first, stop)), totalDays = daysBetween(start, end);
+  return {
+    first, last: addDays(stop, -1), days, totalDays, full: days === totalDays,
+    startsLate: first > start,
+    endsEarly: windowEnd < end && windowEnd < tomorrow,
+    inProgress: start < tomorrow && end > tomorrow && windowEnd >= tomorrow,
+  };
+}
+
 /** h:mm:ss or m:ss. */
 export function fmtDur(seconds: number | null | undefined): string {
   if (seconds == null) return '–';
