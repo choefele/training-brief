@@ -11,6 +11,7 @@ async function render(): Promise<void> {
   const [status, settings, data] = await Promise.all([connectionStatus(), getSettings(), getData()]);
   $('#connected').hidden = !status.connected;
   $('#connectForm').hidden = status.connected;
+  $('#rejected').hidden = !status.rejected;
   if (status.connected) {
     const kind = status.hasKey ? 'Key saved in this browser' : 'Using a pasted access token';
     const until = status.token ? `; token valid until ${fmtTime(new Date(status.token.expiresAt))}` : '; a new token is requested on the next load';

@@ -84,6 +84,10 @@ function renderConnection(): void {
   const el = $('#connection');
   el.classList.toggle('sample', dataset.source === 'sample');
   const loadLabel = dataset.source === 'garmin' ? 'Refresh' : 'Load activities';
+  if (connection.rejected) {
+    el.innerHTML = `<div class="row"><span class="attribution"><i class="dot off"></i>Garmin no longer accepts your key.${dataset.source === 'garmin' ? ' Loaded activities stay available.' : ''}</span><button class="btn ${dataset.source === 'sample' ? 'primary' : ''} small" type="button" data-act="setup">Update key</button></div>`;
+    return;
+  }
   if (!connection.connected) {
     el.innerHTML = dataset.source === 'sample'
       ? `<p><b>Try it with sample data,</b> or connect Garmin Connect™ with your own Personal API key to export your activities.</p>

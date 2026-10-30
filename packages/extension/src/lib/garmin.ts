@@ -1,6 +1,6 @@
 import {
-  addDays, dayKey, GarminClient, GarminError, looksLikeJwt, mergeRawActivities, parseDay, startOfDay, tokenFromString,
-  type AccessToken, type HttpFetch,
+  addDays, connectionState, dayKey, GarminClient, GarminError, looksLikeJwt, mergeRawActivities, NotConnectedError, parseDay, startOfDay,
+  tokenFromString, withAccessToken, type ConnectionState, type CredentialStore, type HttpFetch,
 } from '@training-brief/core';
 import { clearCredentials, getCredentials, getData, saveCredentials, saveData, type Credentials, type StoredData } from './storage.ts';
 
@@ -14,24 +14,12 @@ const extensionFetch: HttpFetch = (url, init) =>
   fetch(url, { method: init.method, headers: init.headers, signal: init.signal as AbortSignal | undefined, credentials: 'omit', cache: 'no-store' });
 
 const client = new GarminClient({ fetch: extensionFetch });
+const store: CredentialStore = { get: getCredentials, save: saveCredentials };
 
-export class NotConnectedError extends Error {
-  constructor(message = 'Connect your Garmin account first.') {
-    super(message);
-    this.name = 'NotConnectedError';
-  }
-}
-
-export interface ConnectionStatus {
-  connected: boolean;
-  hasKey: boolean;
-  token: AccessToken | null;
-}
+export type ConnectionStatus = ConnectionState;
 
 export async function connectionStatus(): Promise<ConnectionStatus> {
-  const c = await getCredentials();
-  const token = c?.token && c.token.expiresAt > Date.now() ? c.token : null;
-  return { connected: !!(c?.apiKey || token), hasKey: !!c?.apiKey, token };
+  return connectionState(await getCredentials());
 }
 
 /**
@@ -48,19 +36,6 @@ export async function connect(secret: string, { isToken = looksLikeJwt(secret) }
 
 export async function disconnect(): Promise<void> {
   await clearCredentials();
-}
-
-async function validToken(forceNew = false): Promise<string> {
-  const c = await getCredentials();
-  if (!c) throw new NotConnectedError();
-  if (!forceNew && c.token && c.token.expiresAt > Date.now()) return c.token.token;
-  if (!c.apiKey) {
-    await saveCredentials({ ...c, token: null });
-    throw new NotConnectedError('Your Garmin access token has expired. Paste your API key, or a new token, in Settings.');
-  }
-  const token = await client.requestToken(c.apiKey);
-  await saveCredentials({ ...c, token });
-  return token.token;
 }
 
 export interface LoadResult {
@@ -81,20 +56,7 @@ export async function loadFromGarmin(neededFrom: Date | null, onProgress?: (load
   const startDate = incremental ? dayKey(addDays(today, -REFRESH_OVERLAP_DAYS)) : dayKey(wanted);
   const search = { startDate, endDate: dayKey(today) };
 
-  let raw;
-  try {
-    raw = await client.loadActivities(await validToken(), search, { onProgress });
-  } catch (err) {
-    if (!(err instanceof GarminError) || err.code !== 'token_expired') throw err;
-    // The stored token stopped working early. With a key we can get a new one once; without, the user has to paste one.
-    raw = await client.loadActivities(await validToken(true), search, { onProgress }).catch(async (again: unknown) => {
-      if (again instanceof GarminError && again.code === 'token_expired') {
-        const c = await getCredentials();
-        if (c) await saveCredentials({ ...c, token: null });
-      }
-      throw again;
-    });
-  }
+  const raw = await withAccessToken(client, store, token => client.loadActivities(token, search, { onProgress }));
 
   let merged = raw;
   if (incremental && existing) {

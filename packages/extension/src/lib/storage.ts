@@ -1,4 +1,4 @@
-import { COACH_PROMPT, DEFAULT_SECTIONS, type AccessToken, type ExportDetail, type ExportFormat, type ExportSections, type GarminActivity, type UnitSystem } from '@training-brief/core';
+import { COACH_PROMPT, DEFAULT_SECTIONS, type Credentials, type ExportDetail, type ExportFormat, type ExportSections, type GarminActivity, type UnitSystem } from '@training-brief/core';
 
 /**
  * Everything lives in chrome.storage on this device. The API key and token stay in
@@ -20,11 +20,7 @@ export interface Settings {
   export: ExportSettings;
 }
 
-export interface Credentials {
-  /** The Personal API key, or null when the user pasted only an access token. */
-  apiKey: string | null;
-  token: AccessToken | null;
-}
+export type { Credentials };
 
 export interface StoredData {
   raw: GarminActivity[];

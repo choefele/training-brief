@@ -7,4 +7,5 @@ export * from './filter.ts';
 export * from './summary.ts';
 export * from './export.ts';
 export * from './garmin.ts';
+export * from './session.ts';
 export * from './sample.ts';

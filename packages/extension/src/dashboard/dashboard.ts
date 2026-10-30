@@ -44,7 +44,7 @@ const S = {
 };
 let data: Dataset = { activities: [], source: 'sample', loadedAt: null, coveredFrom: null };
 let settings: Settings;
-let connection: ConnectionStatus = { connected: false, hasKey: false, token: null };
+let connection: ConnectionStatus = { connected: false, hasKey: false, rejected: false, token: null };
 let U: Units = unitsFor('metric');
 let filtered: Activity[] = [];
 let loading = false;
@@ -126,6 +126,12 @@ function renderHeader(): void {
   const [from] = rangeBounds();
   const gap = isLive() && data.coveredFrom && from && from < data.coveredFrom;
   banner.className = 'banner' + (isLive() ? ' info' : '');
+  if (connection.rejected) {
+    banner.className = 'banner';
+    banner.innerHTML = `<span><strong>Garmin no longer accepts your key.</strong> ${isLive() ? 'Loaded activities stay available; paste a new key to refresh them.' : 'Paste a new key to load your activities.'}</span><button class="link" type="button" data-act="setup">Update key</button>`;
+    banner.hidden = false;
+    return;
+  }
   if (!isLive() && !connection.connected) {
     banner.innerHTML = `<span><strong>You're looking at sample data.</strong> 240 days of made-up runs, rides and swims, so every view has something to show.</span><button class="link" type="button" data-act="setup">Connect your Garmin Connect™ account</button>`;
   } else if (!isLive()) {
@@ -579,12 +585,13 @@ async function loadFromGarminClicked(): Promise<void> {
     await reload();
   } catch (err) {
     loading = false;
+    connection = await connectionStatus();
     renderHeader();
+    if (connection.rejected) return;
     const banner = $('#banner');
     banner.className = 'banner';
     banner.hidden = false;
     banner.innerHTML = `<span><strong>Couldn't load from Garmin.</strong> ${esc(describeError(err))}</span><button class="link" type="button" data-act="setup">Open settings</button>`;
-    connection = await connectionStatus();
   }
 }
 
