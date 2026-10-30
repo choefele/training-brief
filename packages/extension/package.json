@@ -1,0 +1,23 @@
+{
+  "name": "@training-brief/extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Training Brief Chrome extension (Manifest V3).",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "preview": "node build.mjs --preview && python3 -m http.server 8642 -d dist-preview"
+  },
+  "dependencies": {
+    "@training-brief/core": "0.1.0"
+  },
+  "devDependencies": {
+    "@fontsource/barlow-condensed": "5.3.0",
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource/source-sans-3": "5.3.1",
+    "@types/chrome": "0.3.7",
+    "esbuild": "0.28.2"
+  }
+}

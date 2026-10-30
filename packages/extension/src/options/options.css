@@ -1,0 +1,13 @@
+.wrap { max-width: 720px; margin: 0 auto; padding: 28px 16px 40px; display: grid; gap: 16px; }
+header { display: grid; gap: 8px; }
+.lead { margin: 0; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 12px; }
+.card h2 { margin: 0; font: 700 22px/1.1 var(--f-display); text-transform: uppercase; }
+.state { display: grid; gap: 12px; }
+.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.key-row { display: flex; gap: 6px; }
+.key-row input { flex: 1; font-family: var(--f-mono); font-size: 13px; }
+.fine { margin: 0; font-size: 13px; color: var(--muted); max-width: 70ch; }
+.list { padding-left: 18px; display: grid; gap: 4px; }
+.seg { width: fit-content; }
+.seg button { padding: 6px 12px; font-size: 13px; }

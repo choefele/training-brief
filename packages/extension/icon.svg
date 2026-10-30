@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- A brief: three lines of text and a rising bar chart on the Training Brief accent color. -->
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="#c8421b"/>
+  <rect x="26" y="30" width="76" height="13" rx="6.5" fill="#fff"/>
+  <rect x="26" y="54" width="52" height="13" rx="6.5" fill="#fff" fill-opacity=".85"/>
+  <rect x="26" y="88" width="13" height="14" rx="3" fill="#fff"/>
+  <rect x="47" y="80" width="13" height="22" rx="3" fill="#fff"/>
+  <rect x="68" y="72" width="13" height="30" rx="3" fill="#fff"/>
+  <rect x="89" y="62" width="13" height="40" rx="3" fill="#fff"/>
+</svg>

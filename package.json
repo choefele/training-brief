@@ -1,0 +1,27 @@
+{
+  "name": "training-brief",
+  "private": true,
+  "description": "Chrome extension that exports your Garmin Connect™ activities as an AI-ready brief for ChatGPT, Claude or any assistant. Runs locally with your own Personal API key. Not affiliated with Garmin.",
+  "license": "MIT",
+  "author": "Claus Höfele",
+  "workspaces": [
+    "packages/core",
+    "packages/extension"
+  ],
+  "scripts": {
+    "build": "npm run build -w @training-brief/extension",
+    "watch": "npm run watch -w @training-brief/extension",
+    "test": "npm test -w @training-brief/core",
+    "typecheck": "tsc -p packages/core && tsc -p packages/extension",
+    "check": "npm run typecheck && npm test && npm run build",
+    "icons": "node scripts/icons.mjs",
+    "package": "npm run check && node scripts/package.mjs"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

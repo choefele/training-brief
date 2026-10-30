@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Training Brief</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+<main class="panel-wrap">
+  <header class="head">
+    <div class="title-row">
+      <h1 class="wordmark">Training <span>Brief</span></h1>
+      <button class="icon-btn" type="button" id="openSettings" aria-label="Settings" title="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>
+      </button>
+    </div>
+    <p class="attribution" id="source"><i class="dot sample"></i><span>Loading…</span></p>
+  </header>
+
+  <section class="card connection" id="connection" aria-live="polite"></section>
+
+  <section class="card" aria-label="What to export">
+    <div class="chips" id="presets" role="group" aria-label="Presets">
+      <button type="button" class="chip" data-preset="coach" aria-pressed="false">Coach review</button>
+      <button type="button" class="chip" data-preset="race" aria-pressed="false">Race prep</button>
+      <button type="button" class="chip" data-preset="one" aria-pressed="false">One activity</button>
+    </div>
+    <div class="pickers">
+      <label class="field" id="periodField">Period
+        <select id="period">
+          <option value="7">Last 7 days</option>
+          <option value="28">Last 4 weeks</option>
+          <option value="56">Last 8 weeks</option>
+          <option value="84">Last 12 weeks</option>
+          <option value="182">Last 6 months</option>
+          <option value="365">Last 12 months</option>
+        </select>
+      </label>
+      <label class="field">Sport
+        <select id="sport"><option value="">All sports</option></select>
+      </label>
+      <label class="field wide" id="activityField" hidden>Activity
+        <select id="activity"></select>
+      </label>
+    </div>
+    <p class="status coverage" id="coverage" hidden></p>
+  </section>
+
+  <section class="stats" aria-label="Export size">
+    <div><span class="eyebrow">Sessions</span><b class="num" id="statSessions">–</b></div>
+    <div><span class="eyebrow">Time</span><b class="num" id="statTime">–</b></div>
+    <div><span class="eyebrow">Tokens</span><b class="num" id="statTokens">–</b></div>
+  </section>
+  <p class="size" id="sizeHint"></p>
+
+  <button class="btn accent big" type="button" id="copy">Copy for AI</button>
+  <p class="links"><button class="link" type="button" id="save">Save as file</button><span aria-hidden="true">·</span><button class="link" type="button" id="openDashboard">Open dashboard</button></p>
+  <p class="status msg" id="msg" role="status"></p>
+
+  <details class="more opts" id="opts">
+    <summary>Export options</summary>
+    <div class="opts-body">
+      <div class="field">Format
+        <div class="seg" role="group" aria-label="Format" id="format">
+          <button type="button" data-v="md">Markdown</button><button type="button" data-v="json">JSON</button><button type="button" data-v="csv">CSV</button>
+        </div>
+      </div>
+      <div class="field">Detail
+        <div class="seg" role="group" aria-label="Detail" id="detail">
+          <button type="button" data-v="core">Core fields</button><button type="button" data-v="full">Every field</button>
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" id="privacy"> Leave out GPS and profile data</label>
+      <label class="field">Instructions for the assistant
+        <textarea id="instructions" rows="6"></textarea>
+        <small>Presets replace these. More options in the dashboard.</small>
+      </label>
+    </div>
+  </details>
+
+  <footer class="legal">Garmin and Garmin Connect are trademarks of Garmin Ltd. or its subsidiaries. Training Brief is not affiliated with or endorsed by Garmin. Not medical advice. Everything stays in this browser; your key is only sent to Garmin.</footer>
+</main>
+<script type="module" src="sidepanel.js"></script>
+</body>
+</html>

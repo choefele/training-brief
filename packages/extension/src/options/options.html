@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Training Brief settings</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="options.css">
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1 class="wordmark">Training <span>Brief</span></h1>
+    <p class="lead">Settings. Export your Garmin Connect™ activities for an AI chat. Everything stays in this browser.</p>
+  </header>
+
+  <section class="card" aria-labelledby="connectTitle">
+    <h2 id="connectTitle">Connect to Garmin</h2>
+    <div id="connected" class="state" hidden>
+      <p class="frow"><span class="pill good">Connected</span><span class="status" id="connectedInfo"></span></p>
+      <div class="frow">
+        <button class="btn primary" type="button" id="loadNow">Load activities</button>
+        <button class="btn" type="button" id="forget">Forget key</button>
+        <span class="status" id="loadMsg" role="status"></span>
+      </div>
+    </div>
+    <form id="connectForm" autocomplete="off" class="state">
+      <ol class="steps">
+        <li>In Garmin Connect™, create a <b>Personal API key</b>. Garmin's <a href="https://developer.garmin.com/gc-developer-program/personal/" target="_blank" rel="noopener">Personal API page</a> explains where; the key page is in your <a href="https://connect.garmin.com/" target="_blank" rel="noopener">Garmin Connect</a> account.</li>
+        <li>Paste the key here. Training Brief trades it for an access token that lasts up to 24 hours, then loads your activities.</li>
+      </ol>
+      <label class="field">Personal API key
+        <span class="key-row">
+          <input type="password" id="secret" placeholder="Paste your key" spellcheck="false" autocomplete="off">
+          <button class="btn small" type="button" id="reveal" aria-pressed="false">Show</button>
+        </span>
+      </label>
+      <label class="check"><input type="checkbox" id="isToken"> I'm pasting an access token, not the key</label>
+      <p class="status" id="tokenHint" hidden>This looks like an access token. It works until it expires (at most 24 hours); after that you'll need to paste a new one, or your key.</p>
+      <div class="frow">
+        <button class="btn primary" type="submit" id="connect">Connect and load activities</button>
+        <span class="status" id="connectMsg" role="status"></span>
+      </div>
+      <p class="fine">Your key is personal. Garmin's terms allow it only in tools you use for yourself and forbid sharing it. Training Brief stores it only in this browser and sends it only to Garmin, never into an export.</p>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="prefsTitle">
+    <h2 id="prefsTitle">Preferences</h2>
+    <div class="field">Units
+      <div class="seg" role="group" aria-label="Units" id="units">
+        <button type="button" data-v="metric">km, m</button><button type="button" data-v="imperial">mi, ft</button>
+      </div>
+    </div>
+    <label class="check"><input type="checkbox" id="remember"> Remember loaded activities after the browser closes</label>
+    <p class="fine">When this is off, loaded activities are kept only until you close the browser.</p>
+    <div class="frow"><button class="btn small" type="button" id="clearData">Delete loaded activities</button><span class="status" id="dataMsg" role="status"></span></div>
+  </section>
+
+  <section class="card" aria-labelledby="aboutTitle">
+    <h2 id="aboutTitle">About</h2>
+    <ul class="fine list">
+      <li>Garmin is only contacted when you load activities. There is no background sync.</li>
+      <li>Nothing is sent to the developer or any other server. Exports go wherever you paste them.</li>
+      <li>Analysis from an AI assistant is not medical advice.</li>
+      <li>Garmin and Garmin Connect are trademarks of Garmin Ltd. or its subsidiaries. Training Brief is not affiliated with or endorsed by Garmin.</li>
+    </ul>
+    <p class="frow"><button class="link" type="button" id="openDashboard">Open dashboard</button></p>
+  </section>
+</main>
+<script type="module" src="options.js"></script>
+</body>
+</html>

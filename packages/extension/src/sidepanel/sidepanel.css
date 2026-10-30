@@ -1,0 +1,33 @@
+/* Side panel: one column for 300–400 px, next to an AI chat. */
+body { font-size: 14px; }
+.panel-wrap { padding: 14px 14px 18px; display: grid; gap: 12px; max-width: 480px; margin: 0 auto; }
+.head { display: grid; gap: 4px; }
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wordmark { font-size: 30px; }
+.icon-btn { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; color: var(--muted); flex: none; }
+.icon-btn:hover { color: var(--ink); border-color: var(--muted); }
+.icon-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.attribution { margin: 0; flex-wrap: wrap; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; display: grid; gap: 10px; }
+.connection { gap: 8px; font-size: 13px; }
+.connection p { margin: 0; color: var(--muted); }
+.connection .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.connection.sample { background: color-mix(in srgb, var(--warn) 12%, var(--surface)); border-color: color-mix(in srgb, var(--warn) 40%, var(--line)); }
+.pickers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pickers .wide { grid-column: 1 / -1; }
+.pickers:has(#periodField[hidden]) { grid-template-columns: 1fr; }
+.pickers select { width: 100%; }
+.coverage { margin: 0; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.stats div { background: var(--surface); padding: 9px 10px; display: grid; gap: 3px; min-width: 0; }
+.stats b { font: 700 24px/1 var(--f-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.size { margin: -4px 0 0; font-size: 13px; }
+.big { width: 100%; padding: 12px 14px; font-size: 16px; }
+.links { margin: -4px 0 0; display: flex; gap: 8px; justify-content: center; color: var(--muted); font-size: 13px; }
+.msg { margin: -6px 0 0; text-align: center; min-height: 1.2em; }
+.opts { border-top: 1px solid var(--line); padding-top: 10px; }
+.opts-body { display: grid; gap: 10px; margin-top: 10px; }
+.opts .seg { width: fit-content; }
+.opts small { color: var(--muted); }
+#instructions { font-size: 13px; }
+footer { padding-top: 4px; }

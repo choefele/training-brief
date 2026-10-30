@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Training Brief</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1 class="wordmark">Training <span>Brief</span></h1>
+      <p class="sub">Your Garmin Connect™ activities, measured and ready to paste into an AI chat.<span id="chartAttribution"></span></p>
+    </div>
+    <div class="top-actions">
+      <span class="attribution" id="attribution"></span>
+      <button class="btn" id="loadBtn" type="button" hidden>Refresh from Garmin</button>
+      <button class="btn" id="settingsBtn" type="button">Settings</button>
+      <div class="seg" role="group" aria-label="Units" id="units">
+        <button type="button" data-units="metric">km</button>
+        <button type="button" data-units="imperial">mi</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <section class="filters" aria-label="Filters">
+    <div class="frow">
+      <label class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+        <input id="q" type="search" placeholder="Search names, notes, places…" aria-label="Search activities" autocomplete="off">
+      </label>
+      <select id="range" aria-label="Date range">
+        <option value="30">Last 30 days</option>
+        <option value="90" selected>Last 90 days</option>
+        <option value="182">Last 6 months</option>
+        <option value="365">Last 12 months</option>
+        <option value="ytd">This year</option>
+        <option value="all">All loaded</option>
+        <option value="custom">Custom range…</option>
+      </select>
+      <span class="frow" id="customRange" hidden>
+        <input type="date" id="from" aria-label="From date">
+        <span aria-hidden="true">–</span>
+        <input type="date" id="to" aria-label="To date">
+      </span>
+    </div>
+    <div class="chips" id="sportChips" role="group" aria-label="Sports"></div>
+    <div class="frow">
+      <details class="more" id="moreFilters">
+        <summary>More filters</summary>
+        <div class="more-grid">
+          <label class="field">Event type<select id="event"><option value="">Any</option></select></label>
+          <div class="field">Distance (<span class="u-dist">km</span>)
+            <span class="pair"><input type="number" id="minDist" min="0" step="any" placeholder="min" aria-label="Minimum distance"><input type="number" id="maxDist" min="0" step="any" placeholder="max" aria-label="Maximum distance"></span>
+          </div>
+          <div class="field">Moving time (minutes)
+            <span class="pair"><input type="number" id="minDur" min="0" step="1" placeholder="min" aria-label="Minimum minutes"><input type="number" id="maxDur" min="0" step="1" placeholder="max" aria-label="Maximum minutes"></span>
+          </div>
+          <div class="field">Flags
+            <label class="check"><input type="checkbox" id="prOnly"> Personal records</label>
+            <label class="check"><input type="checkbox" id="favOnly"> Favorites</label>
+          </div>
+        </div>
+      </details>
+      <button class="link" type="button" id="resetFilters">Reset filters</button>
+      <span class="count num" id="count"></span>
+    </div>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button role="tab" id="tab-dashboard" aria-controls="dashboard" aria-selected="true" type="button">Dashboard</button>
+    <button role="tab" id="tab-activities" aria-controls="activities" aria-selected="false" type="button">Activities</button>
+    <button role="tab" id="tab-export" aria-controls="export" aria-selected="false" type="button">Export for AI</button>
+  </nav>
+
+  <section id="dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
+    <div class="kpis" id="kpis"></div>
+    <div class="grid">
+      <div class="panel span2">
+        <div class="ph"><h2>Volume</h2>
+          <div class="seg" role="group" aria-label="Volume metric" id="volMetric">
+            <button type="button" data-v="time" aria-pressed="true">Time</button>
+            <button type="button" data-v="dist" aria-pressed="false">Distance</button>
+            <button type="button" data-v="elev" aria-pressed="false">Climb</button>
+            <button type="button" data-v="count" aria-pressed="false">Sessions</button>
+          </div>
+        </div>
+        <div class="chart" id="volChart"></div>
+        <div class="legend" id="volLegend"></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h2>Sport mix</h2><span class="hint">share of moving time</span></div>
+        <div class="bars" id="mix"></div>
+      </div>
+      <div class="panel span3">
+        <div class="ph"><h2>Consistency</h2><span class="hint" id="heatHint"></span></div>
+        <div class="heat-scroll" id="heatScroll"><div id="heat"></div></div>
+        <div class="legend" id="heatLegend"></div>
+      </div>
+      <div class="panel span2">
+        <div class="ph"><h2>Running trend</h2>
+          <div class="seg" role="group" aria-label="Trend metric" id="trendMetric">
+            <button type="button" data-v="pace" aria-pressed="true">Pace</button>
+            <button type="button" data-v="hr" aria-pressed="false">Avg HR</button>
+            <button type="button" data-v="eff" aria-pressed="false">Pace per beat</button>
+          </div>
+        </div>
+        <div class="chart" id="trend"></div>
+        <div class="legend" id="trendLegend"></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h2>Training effect</h2><span class="hint">aerobic, per session</span></div>
+        <div class="bars" id="teBars"></div>
+      </div>
+      <div class="panel span3">
+        <div class="ph"><h2>Bests in this selection</h2><span class="hint">click one to open it</span></div>
+        <div class="records" id="records"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="activities" role="tabpanel" aria-labelledby="tab-activities" hidden>
+    <div class="table-head"><span class="attribution" id="tableAttribution"></span><span class="status">Click a row for details.</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr id="thead"></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="list-foot"><span id="listInfo" class="num"></span><button class="btn small" type="button" id="more">Show more</button></div>
+  </section>
+
+  <section id="export" role="tabpanel" aria-labelledby="tab-export" hidden>
+    <div class="export">
+      <form class="opts panel" id="exportOpts">
+        <fieldset>
+          <legend>Format</legend>
+          <div class="radio-cards">
+            <label><input type="radio" name="format" value="md"><b>Markdown</b><small>Tables an assistant reads well. Paste into a chat.</small></label>
+            <label><input type="radio" name="format" value="json"><b>JSON</b><small>Structured, for code or tool use.</small></label>
+            <label><input type="radio" name="format" value="csv"><b>CSV</b><small>One row per activity, for spreadsheets. Only the activity list.</small></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Detail</legend>
+          <div class="radio-cards">
+            <label><input type="radio" name="detail" value="core"><b>Core fields</b><small>About 20 fields per activity. Fits most chats.</small></label>
+            <label><input type="radio" name="detail" value="full"><b>Every field</b><small>Everything the API returned, including running dynamics and power.</small></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Include</legend>
+          <label class="check"><input type="checkbox" name="instructions"> Instructions for the assistant</label>
+          <label class="check"><input type="checkbox" name="about"> About this data</label>
+          <label class="check"><input type="checkbox" name="summary"> Summary by sport</label>
+          <label class="check"><input type="checkbox" name="weekly"> Weekly totals</label>
+          <label class="check"><input type="checkbox" name="activities"> Activity list</label>
+          <label class="check"><input type="checkbox" name="privacy"> Leave out GPS coordinates and profile data</label>
+        </fieldset>
+        <label class="field" id="instructionsField">Instructions
+          <textarea id="instructions" rows="6"></textarea>
+        </label>
+      </form>
+      <div class="panel">
+        <div class="out-bar">
+          <span class="status num" id="exportStats"></span>
+          <span class="frow">
+            <button class="btn accent" type="button" id="copyExport">Copy for AI</button>
+            <button class="btn" type="button" id="downloadExport">Save as file</button>
+          </span>
+        </div>
+        <p class="size" id="exportSize"></p>
+        <textarea id="exportOut" readonly spellcheck="false" aria-label="Export preview"></textarea>
+        <span class="status" id="exportMsg" role="status">The export covers the activities your filters select.</span>
+      </div>
+    </div>
+  </section>
+
+  <footer class="legal">
+    Garmin and Garmin Connect are trademarks of Garmin Ltd. or its subsidiaries. Training Brief is not affiliated with or endorsed by Garmin. Not medical advice. Everything stays in this browser; your key is only sent to Garmin.
+  </footer>
+</div>
+
+<dialog id="detailDlg" aria-labelledby="detailTitle">
+  <div class="dlg-h"><div><div class="eyebrow" id="detailMeta"></div><h2 id="detailTitle"></h2></div><button class="x" type="button" data-close aria-label="Close">×</button></div>
+  <div class="dlg-b" id="detailBody"></div>
+</dialog>
+
+<div id="tip" hidden></div>
+<script type="module" src="dashboard.js"></script>
+</body>
+</html>
