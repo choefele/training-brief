@@ -15,7 +15,8 @@
     "typecheck": "tsc -p packages/core && tsc -p packages/extension",
     "check": "npm run typecheck && npm test && npm run build",
     "icons": "node scripts/icons.mjs",
-    "package": "npm run check && node scripts/package.mjs"
+    "package": "npm run check && node scripts/package.mjs",
+    "store-assets": "node scripts/store-assets.mjs"
   },
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",

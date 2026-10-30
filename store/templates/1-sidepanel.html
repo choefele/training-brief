@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Screenshot 1 · Side panel</title>
+<link rel="stylesheet" href="store.css">
+<style>
+  .hero { display: grid; grid-template-columns: 1fr 400px; gap: 70px; height: 100%; padding: 60px 70px; box-sizing: border-box; align-items: center; }
+  .panel { height: 680px; }
+  .snippet { margin-top: 34px; }
+</style>
+</head>
+<body>
+  <div class="hero">
+    <div>
+      <h1 class="headline">Your training,<br><span>ready for any AI chat</span></h1>
+      <ul class="points">
+        <li><b>1</b><span>Connect Garmin Connect™ with your own Personal API key.</span></li>
+        <li><b>2</b><span>Pick a preset, a period and a sport.</span></li>
+        <li><b>3</b><span>Click <strong>Copy for AI</strong> and paste the brief into ChatGPT, Claude or any assistant.</span></li>
+      </ul>
+<pre class="snippet"><span class="h"># Training brief</span>
+<span class="h">## Instructions for the assistant</span>
+You are an experienced endurance coach. Review my
+training log below. Describe trends in volume, …
+<span class="h">## Summary by sport</span>
+- Running: 35 sessions, 408 km, 36 h 12 m <span class="c">…</span></pre>
+    </div>
+    <div class="panel"><iframe src="../sidepanel.html" data-scroll="body"></iframe></div>
+  </div>
+  <script src="frame.js"></script>
+</body>
+</html>

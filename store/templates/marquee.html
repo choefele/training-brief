@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Marquee promo tile · 1400×560</title>
+<link rel="stylesheet" href="store.css">
+<style>
+  .hero { display: grid; grid-template-columns: 1fr 400px; gap: 80px; height: 100%; padding: 0 90px; box-sizing: border-box; align-items: center; }
+  .wordmark { font-size: 40px; }
+  .headline { margin-top: 34px; font-size: 76px; }
+  .sub { font-size: 24px; }
+  /* The panel runs off the bottom edge on purpose. */
+  .panel { align-self: start; margin-top: 60px; height: 640px; }
+</style>
+</head>
+<body>
+  <div class="hero">
+    <div>
+      <div class="mark"><img src="../icons/icon-128.png" width="60" height="60" alt=""><span class="wordmark">Training <span>Brief</span></span></div>
+      <h1 class="headline">Your training,<br><span>ready for any AI chat</span></h1>
+      <p class="sub">Export your Garmin Connect™ activities as a brief for ChatGPT, Claude or any assistant. Runs locally with your own key.</p>
+    </div>
+    <div class="panel"><iframe src="../sidepanel.html"></iframe></div>
+  </div>
+</body>
+</html>

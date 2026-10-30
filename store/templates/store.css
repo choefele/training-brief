@@ -1,0 +1,34 @@
+/* Shared layout for the Chrome Web Store screenshots and promo tiles. Uses the extension's own tokens and fonts. */
+@import url("../fonts.css");
+@import url("../base.css");
+
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body { background: var(--bg); }
+
+.headline { margin: 0; font: 700 56px/0.95 var(--f-display); letter-spacing: -.01em; text-transform: uppercase; color: var(--ink); }
+.headline span { color: var(--accent); }
+.sub { margin: 14px 0 0; font-size: 22px; line-height: 1.4; color: var(--muted); max-width: 30em; }
+
+/* Headline band on top, the page in a window below. */
+.shot { display: flex; flex-direction: column; height: 100%; padding: 44px 50px 0; box-sizing: border-box; }
+.shot .sub { margin-top: 10px; }
+.window { flex: 1; margin-top: 32px; border: 1px solid var(--line); border-bottom: 0; border-radius: 14px 14px 0 0; background: var(--surface); box-shadow: 0 18px 50px rgba(23, 32, 28, .16); overflow: hidden; display: flex; flex-direction: column; }
+.window .bar { flex: none; height: 30px; display: flex; align-items: center; gap: 7px; padding: 0 14px; background: var(--sunk); border-bottom: 1px solid var(--line); }
+.window .bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); }
+.window iframe { flex: 1; width: 100%; border: 0; display: block; }
+
+/* Side panel next to the browser content. */
+.panel { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--bg); box-shadow: 0 18px 50px rgba(23, 32, 28, .18); }
+.panel iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+.points { margin: 30px 0 0; padding: 0; list-style: none; display: grid; gap: 16px; }
+.points li { display: flex; gap: 14px; align-items: baseline; font-size: 21px; line-height: 1.35; color: var(--ink); }
+.points b { flex: none; display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 700 18px/1 var(--f-display); transform: translateY(4px); }
+
+.snippet { margin: 0; padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font: 14px/1.55 var(--f-mono); color: var(--ink); white-space: pre; overflow: hidden; }
+.snippet .c { color: var(--muted); }
+.snippet .h { color: var(--accent); font-weight: 500; }
+
+.mark { display: flex; align-items: center; gap: 16px; }
+.mark img { display: block; }
+.mark .wordmark { color: var(--ink); }

@@ -51,7 +51,7 @@ Then open `chrome://extensions`, turn on Developer mode, choose **Load unpacked*
 
 `npm run preview -w @training-brief/extension` serves the pages at http://localhost:8642 in a normal tab, with `chrome.*` stubbed and sample data. It's for UI work only; it can't reach Garmin.
 
-`npm run package` writes a zip for the Chrome Web Store. `npm run icons` re-renders the PNG icons from `packages/extension/icon.svg`.
+`npm run package` writes a zip for the Chrome Web Store. `npm run store-assets` renders the store screenshots and promo tiles from `store/templates` into `store/` (needs Google Chrome; set `CHROME` to use another path). `npm run icons` re-renders the PNG icons from `packages/extension/icon.svg`.
 
 ### Layout
 
@@ -66,6 +66,10 @@ Then open `chrome://extensions`, turn on Developer mode, choose **Load unpacked*
 - Token: `POST /personalapitoken-service/personal-api/personal-api-key/token` with `Authorization: ApiKey <key>`. The response format isn't documented, so the client accepts a bare string or JSON with `access_token`, `accessToken`, `token` or `value`. Expiry comes from a JWT's `exp`, otherwise about 23 hours.
 - Activities: `GET /activitylist-service/activities/search/activities?start=…&limit=100&startDate=…&endDate=…` with a bearer token, paged until a short page.
 - Don't send `Accept: application/json`: the token endpoint answered HTTP 406 to it.
+
+## Privacy
+
+See [PRIVACY.md](PRIVACY.md).
 
 ## License
 
