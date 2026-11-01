@@ -142,6 +142,22 @@ describe('CSV export', () => {
   it('writes a header even without activities', () => {
     expect(buildExport([], opts({ format: 'csv' })).text.split('\n')[0]).toContain('data_source,date');
   });
+
+  it('writes the same core columns whether or not anything matched', () => {
+    for (const units of ['metric', 'imperial'] as const) {
+      const header = (acts: typeof list) => buildExport(acts, opts({ format: 'csv', units })).text.split('\n')[0];
+      const empty = header([]);
+      for (const col of ['event', 'personal_record', 'notes', 'location']) expect(empty.split(',')).toContain(col);
+      expect(header(list)).toBe(empty);
+      expect(header(normalizeActivities(makeSampleActivities(NOW)).activities)).toBe(empty);
+    }
+  });
+
+  it('appends raw fields after the core columns in full detail', () => {
+    const core = buildExport(list, opts({ format: 'csv' })).text.split('\n')[0];
+    const full = buildExport(list, opts({ format: 'csv', detail: 'full' })).text.split('\n')[0];
+    expect(full.startsWith(`${core},raw.`)).toBe(true);
+  });
 });
 
 describe('export safety and size', () => {

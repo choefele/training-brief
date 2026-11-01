@@ -105,6 +105,16 @@ const dropEmpty = (r: Row): Row => {
   return r;
 };
 
+/** Every column coreRecord can produce, in CSV header order. */
+const coreColumns = (u: Units): string[] => {
+  const c = columnsFor(u);
+  return [
+    'date', 'sport', 'type', 'name', c.dist, 'moving_time', c.pace, c.swimPace, c.speed, c.elev, 'avg_hr', 'max_hr',
+    'aerobic_te', 'anaerobic_te', 'training_stress', 'avg_power_w', 'norm_power_w', 'vo2max', 'calories',
+    'event', 'personal_record', 'notes', 'location', 'activity_id',
+  ];
+};
+
 /** About 20 fields that cover most coaching questions. */
 export function coreRecord(a: Activity, u: Units): Row {
   const c = columnsFor(u);
@@ -317,15 +327,13 @@ const csvCell = (v: unknown): string => {
 /** One row per activity; sections other than the activity list don't fit a CSV. */
 function buildCsv(p: Prepared, o: ExportOptions): string {
   const recs = p.list.map(a => ({ data_source: p.source, ...(o.detail === 'full' ? fullRecord(a, p.u, o.privacy) : coreRecord(a, p.u)) }));
-  const cols = recs.length ? [...new Set(recs.flatMap(r => Object.keys(r)))] : ['data_source', ...Object.keys(coreRecord(SAMPLE_ROW_SHAPE, p.u))];
+  // Core columns are fixed so every export has the same header; full detail appends the raw.* fields present.
+  const fixed = ['data_source', ...coreColumns(p.u)];
+  const known = new Set(fixed);
+  const extra = [...new Set(recs.flatMap(r => Object.keys(r)))].filter(k => !known.has(k));
+  const cols = [...fixed, ...extra];
   return [cols.join(','), ...recs.map(r => cols.map(c => csvCell((r as Row)[c])).join(','))].join('\n') + '\n';
 }
-
-// Gives an empty CSV the usual header row.
-const SAMPLE_ROW_SHAPE: Activity = {
-  id: 0, name: '-', desc: '', location: '', start: new Date(2000, 0, 1), day: '2000-01-01', typeKey: 'running', fam: 'run', event: 'uncategorized',
-  dist: 1, dur: 1, elapsed: 1, elev: 1, avgHR: 1, maxHR: 1, cal: 1, aerTE: 1, anaTE: 1, tss: 1, vo2: 1, power: 1, np: 1, fav: false, pr: false, raw: {},
-};
 
 /** Builds the export text. Never includes API keys or tokens: it only sees activities. */
 export function buildExport(activities: readonly Activity[], o: ExportOptions): ExportResult {
