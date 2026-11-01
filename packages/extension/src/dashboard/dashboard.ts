@@ -736,21 +736,31 @@ $('#exportOpts').addEventListener('change', e => {
   if ((e.target as Element).id !== 'instructions') readExportForm();
 });
 $('#exportOpts').addEventListener('submit', e => e.preventDefault());
+// Own timer, so typing in the search box can't cancel a pending save.
+let instructionsTimer: ReturnType<typeof setTimeout> | undefined;
+let pendingInstructions: string | undefined;
+const saveInstructions = (): void => {
+  clearTimeout(instructionsTimer);
+  const value = pendingInstructions;
+  if (value === undefined) return;
+  pendingInstructions = undefined;
+  settings = { ...settings, export: { ...settings.export, instructions: value } };
+  void updateSettings({ export: { instructions: value } });
+  renderExport();
+};
 $('#instructions').addEventListener('input', e => {
-  clearTimeout(qTimer);
-  const value = (e.target as HTMLTextAreaElement).value;
-  qTimer = setTimeout(() => {
-    settings = { ...settings, export: { ...settings.export, instructions: value } };
-    void updateSettings({ export: { instructions: value } });
-    renderExport();
-  }, 250);
+  clearTimeout(instructionsTimer);
+  pendingInstructions = (e.target as HTMLTextAreaElement).value;
+  instructionsTimer = setTimeout(saveInstructions, 250);
 });
 $('#copyExport').addEventListener('click', async () => {
+  saveInstructions();
   if (!lastExport) return;
   const ok = await copyText(lastExport.text);
   setStatus($('#exportMsg'), ok ? 'Copied. Paste it into your AI chat.' : "Couldn't copy here. Use Save as file instead.", ok ? 'ok' : 'err');
 });
 $('#downloadExport').addEventListener('click', () => {
+  saveInstructions();
   if (!lastExport) return;
   downloadExport(lastExport);
   setStatus($('#exportMsg'), `Saved ${lastExport.filename}.`, 'ok');
