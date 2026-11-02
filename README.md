@@ -59,7 +59,6 @@ Then open `chrome://extensions`, turn on Developer mode, choose **Load unpacked*
 |---|---|
 | `packages/core` | Garmin Personal API client, record normalization, filters, summaries and the Markdown/JSON/CSV export builders. No browser-extension dependencies, so a later MCP server (`training-brief-mcp`) can reuse it. Tests use Vitest. |
 | `packages/extension` | Manifest V3 extension: service worker, side panel, dashboard and settings pages. Plain TypeScript, bundled with esbuild. |
-| `docs/prototype/logbook.html` | The single-page prototype the extension grew from. |
 
 ### Garmin Personal API notes
 
