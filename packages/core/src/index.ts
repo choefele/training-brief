@@ -5,6 +5,7 @@ export * from './sports.ts';
 export * from './normalize.ts';
 export * from './filter.ts';
 export * from './summary.ts';
+export * from './load.ts';
 export * from './export.ts';
 export * from './garmin.ts';
 export * from './session.ts';
