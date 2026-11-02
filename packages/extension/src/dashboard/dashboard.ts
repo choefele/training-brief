@@ -194,7 +194,7 @@ const VOL: Record<VolMetric, { get: (a: Activity) => number; fmt: (v: number) =>
 
 interface Bin { start: Date; end: Date; v: Partial<Record<Family, number>>; total: number; span?: BinSpan }
 
-/** Tooltip lines that say which days a bar counts and, for a partial bar, why. */
+/** Tooltip lines that say which days a week or month counts and, for a partial one, why. */
 function spanLines(b: Bin, monthly: boolean): string[] {
   const s = b.span!, unit = monthly ? 'month' : 'week', count = `${s.days} of ${s.totalDays} days`;
   const lines = [fmtSpan(s.first, s.last)];
@@ -242,31 +242,42 @@ function renderVolume(): void {
     if (i % every === 0) s += `<text x="${m.l + i * bw + bw / 2}" y="${H - 6}" text-anchor="middle">${monthly ? MONTHS[b.start.getMonth()] + (b.start.getMonth() === 0 ? ' ' + String(b.start.getFullYear()).slice(2) : '') : fmtShort(b.start)}</text>`;
   });
   s += '</g>';
-  const gap = Math.min(4, bw * 0.2);
+  // Legend and tooltip list sports in FAMILY_ORDER; the stack reads the same way top to bottom,
+  // so the first sport is the top layer and the stack is built from the last one up.
+  const fams = FAMILY_ORDER.filter(f => bins.some(b => b.v[f]));
+  // One point per bin at its center; a lone bin spans the whole plot so it still has an area.
+  const xs = bins.length > 1 ? bins.map((_, i) => m.l + i * bw + bw / 2) : [m.l, W - m.r];
+  const pts = (vals: number[]): string[] => xs.map((x, j) => `${x.toFixed(1)},${y(vals[Math.min(j, vals.length - 1)]).toFixed(1)}`);
+  let below = bins.map(() => 0);
+  let layers = '';
+  [...fams].reverse().forEach(f => {
+    const above = below.map((v, i) => v + (bins[i].v[f] ?? 0));
+    const topLine = pts(above);
+    layers += `<path d="M${topLine.join('L')}L${pts(below).reverse().join('L')}Z" style="fill:${FAMILIES[f].color}" fill-opacity=".8"></path>` +
+      `<path d="M${topLine.join('L')}" fill="none" style="stroke:${FAMILIES[f].color}" stroke-width="1.5" stroke-linejoin="round"></path>`;
+    below = above;
+  });
+  s += `<clipPath id="volArea"><path d="M${pts(below).join('L')}L${xs[xs.length - 1]},${y(0)}L${xs[0]},${y(0)}Z"></path></clipPath>` + layers;
   bins.forEach((b, i) => {
-    let acc = 0;
-    const x = m.l + i * bw + gap / 2, w = Math.max(1, bw - gap);
-    FAMILY_ORDER.forEach(f => {
-      const v = b.v[f];
-      if (!v) return;
-      const y0 = y(acc), y1 = y(acc + v);
-      s += `<rect x="${x}" y="${y1}" width="${w}" height="${Math.max(0, y0 - y1 - (acc ? 1 : 0))}" style="fill:${FAMILIES[f].color}" rx="1.5"></rect>`;
-      acc += v;
-    });
-    // Hatching marks bars that count fewer days than a whole week or month.
-    if (acc && !b.span!.full) s += `<rect x="${x}" y="${y(acc)}" width="${w}" height="${y(0) - y(acc)}" fill="url(#partialHatch)" rx="1.5"></rect>`;
-    const lines = FAMILY_ORDER.filter(f => b.v[f]).map(f => `${FAMILIES[f].label}: ${g.fmt(b.v[f]!)}`);
+    // Hatching marks weeks or months that count fewer days than a whole one.
+    if (b.total && !b.span!.full) {
+      const x0 = Math.max(m.l, m.l + i * bw), x1 = Math.min(W - m.r, m.l + (i + 1) * bw);
+      s += `<rect x="${x0}" y="${m.t}" width="${x1 - x0}" height="${ih}" fill="url(#partialHatch)" clip-path="url(#volArea)"></rect>`;
+    }
+  });
+  bins.forEach((b, i) => {
+    const lines = fams.filter(f => b.v[f]).map(f => `${FAMILIES[f].label}: ${g.fmt(b.v[f]!)}`);
     const tip = [...spanLines(b, monthly), `Total: ${g.fmt(b.total)}`, ...(lines.length > 1 ? lines : [])].join('\n');
     s += `<rect class="hit" x="${m.l + i * bw}" y="${m.t}" width="${bw}" height="${ih}" data-tip="${esc(tip)}"></rect>`;
   });
   s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(0)}" y2="${y(0)}" style="stroke:var(--muted)"></line></svg>`;
   el.innerHTML = s;
-  // Partial bars would pull the average down; leave them out unless nothing else is left.
+  // Partial weeks or months would pull the average down; leave them out unless nothing else is left.
   const unit = monthly ? 'month' : 'week';
   const full = bins.filter(b => b.span!.full), counted = full.length ? full : bins;
   const avg = counted.reduce((t, b) => t + b.total, 0) / counted.length;
   const hasPartial = full.length < bins.length;
-  $('#volLegend').innerHTML = FAMILY_ORDER.filter(f => bins.some(b => b.v[f])).map(f => `<span><i style="background:${FAMILIES[f].color}"></i>${FAMILIES[f].label}</span>`).join('') +
+  $('#volLegend').innerHTML = fams.map(f => `<span><i style="background:${FAMILIES[f].color}"></i>${FAMILIES[f].label}</span>`).join('') +
     (hasPartial ? `<span><i class="partial"></i>Partial ${unit}</span>` : '') +
     `<span style="margin-left:auto">Average per ${hasPartial && full.length ? `full ${unit}` : unit}: <b class="num" style="color:var(--ink)">${g.fmt(S.vol === 'count' ? Math.round(avg * 10) / 10 : avg)}</b></span>`;
 }
