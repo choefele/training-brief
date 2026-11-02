@@ -81,8 +81,7 @@ td.name { white-space: normal; min-width: 200px; max-width: 360px; }
 td.name b { font-weight: 600; display: block; }
 td.name small, td small { color: var(--muted); }
 .flag { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-left: 4px; vertical-align: 1px; }
-.flag.pr { color: var(--accent); border: 1px solid var(--accent); }
-.flag.race { color: var(--ride); border: 1px solid var(--ride); }
+.flag.pr, .flag.race { color: var(--ink); border: 1px solid var(--muted); }
 .flag.fav { color: var(--warn); }
 .sport { display: inline-flex; align-items: center; gap: 6px; }
 .te { display: inline-flex; align-items: center; gap: 6px; }

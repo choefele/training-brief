@@ -253,6 +253,7 @@ function renderVolume(): void {
   [...fams].reverse().forEach(f => {
     const above = below.map((v, i) => v + (bins[i].v[f] ?? 0));
     const topLine = pts(above);
+    // A lighter fill under a full-strength line: the line carries the contrast, the fill stays calm.
     layers += `<path d="M${topLine.join('L')}L${pts(below).reverse().join('L')}Z" style="fill:${FAMILIES[f].color}" fill-opacity=".8"></path>` +
       `<path d="M${topLine.join('L')}" fill="none" style="stroke:${FAMILIES[f].color}" stroke-width="1.5" stroke-linejoin="round"></path>`;
     below = above;
@@ -422,7 +423,9 @@ function renderTE(): void {
     return;
   }
   const counts = TE_BANDS.map(b => vals.filter(v => v >= b[0] && v < b[1]).length), max = Math.max(...counts);
-  const colors = ['var(--other)', 'var(--other)', 'var(--swim)', 'var(--ride)', 'var(--run)', 'var(--bad)'];
+  // Brand orange in steps that grow stronger with more benefit; overreaching takes the ink color,
+  // because the warning red sits too close to orange to tell apart. Sport colors stay for sports.
+  const colors = ['var(--te-1)', 'var(--te-2)', 'var(--te-3)', 'var(--te-4)', 'var(--te-5)', 'var(--ink)'];
   $('#teBars').innerHTML = TE_BANDS.map((b, i) => `<div class="bar-row"><span class="lbl"><b>${b[2]}</b><span class="val num">${b[0]}${b[1] > 5 ? '' : '–' + (b[1] - 0.1).toFixed(1)}</span></span><span class="val num">${counts[i]}</span><span class="track"><i style="width:${max ? (counts[i] / max) * 100 : 0}%;background:${colors[i]}"></i></span></div>`).join('') +
     `<p class="caption" style="font-size:13px">${Math.round((vals.filter(v => v >= 3).length / vals.length) * 100)}% of sessions improved fitness (3.0 or higher).</p>`;
 }
@@ -508,7 +511,7 @@ function openDetail(id: string | undefined): void {
   const pace = a.dist && a.dur ? `<div><span>${usesPace(a.fam) ? 'Avg pace' : 'Moving speed'}</span><b>${esc(paceOrSpeed(a, U))}</b></div>` : '';
   $('#detailBody').innerHTML = `
     ${a.desc ? `<p style="margin:0;max-width:68ch">${esc(a.desc)}</p>` : ''}
-    <div class="frow">${a.pr ? '<span class="pill bad" style="color:var(--accent)">Personal record</span>' : ''}${a.event !== 'uncategorized' ? `<span class="pill muted">${esc(typeLabel(a.event))}</span>` : ''}${a.fav ? '<span class="pill warn">★ Favorite</span>' : ''}</div>
+    <div class="frow">${a.pr ? '<span class="pill mark">Personal record</span>' : ''}${a.event !== 'uncategorized' ? `<span class="pill muted">${esc(typeLabel(a.event))}</span>` : ''}${a.fav ? '<span class="pill warn">★ Favorite</span>' : ''}</div>
     <div class="metric-grid">${pace}${cells}</div>
     <p class="caption">${isLive() ? 'Data provided by Garmin.' : 'Sample data, made up for illustration.'}</p>
     <div class="frow">
